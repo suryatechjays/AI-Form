@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AEGIS Patient Registration Dossier - {{ reg.registration_id }}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 15mm 15mm 15mm 15mm;
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 8pt;
+        color: #666;
+      }
+      @bottom-left {
+        content: "AEGIS Secure Clinical Record | Checksum: {{ reg.pdf_checksum_sha256[:16] if reg.pdf_checksum_sha256 else 'PENDING' }}";
+        font-size: 8pt;
+        color: #666;
+      }
+    }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.4;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+    }
+    .header-table {
+      width: 100%;
+      border-bottom: 2pt solid #1e3a8a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .hospital-title {
+      font-size: 16pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      letter-spacing: 0.5px;
+    }
+    .hospital-subtitle {
+      font-size: 9pt;
+      color: #4b5563;
+      margin-top: 2px;
+    }
+    .dossier-badge {
+      text-align: right;
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 9pt;
+      font-weight: bold;
+      color: #ffffff;
+      background-color: #047857;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .badge-reg-id {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      margin-top: 4px;
+    }
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      background-color: #f0fdf4;
+      border-left: 3.5pt solid #059669;
+      padding: 3px 8px;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    table.data-grid {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+    table.data-grid td {
+      padding: 3px 6px;
+      vertical-align: top;
+      border: 1px solid #e5e7eb;
+    }
+    .label {
+      width: 25%;
+      font-weight: bold;
+      color: #374151;
+      background-color: #f9fafb;
+    }
+    .value {
+      width: 25%;
+      color: #111827;
+    }
+    .full-row-label {
+      width: 25%;
+      font-weight: bold;
+      color: #374151;
+      background-color: #f9fafb;
+    }
+    .full-row-value {
+      width: 75%;
+      color: #111827;
+    }
+    .clinical-alert {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+    .stamp-container {
+      width: 100%;
+      margin-top: 15px;
+      page-break-inside: avoid;
+    }
+    .stamp-box {
+      width: 45%;
+      height: 90px;
+      border: 1.5pt dashed #4b5563;
+      border-radius: 4px;
+      text-align: center;
+      padding: 8px;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .signature-box {
+      width: 45%;
+      height: 90px;
+      border-bottom: 1.5pt solid #111827;
+      margin-left: 8%;
+      display: inline-block;
+      vertical-align: top;
+      text-align: center;
+    }
+    .stamp-text {
+      font-size: 8pt;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 25px;
+    }
+    .sig-text {
+      font-size: 8pt;
+      color: #374151;
+      margin-top: 75px;
+      font-weight: bold;
+    }
+    .disclaimer {
+      font-size: 7.5pt;
+      color: #6b7280;
+      text-align: justify;
+      margin-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <table class="header-table">
+    <tr>
+      <td>
+        <div class="hospital-title">AEGIS CLINICAL HEALTHCARE SYSTEM</div>
+        <div class="hospital-subtitle">Department of Clinical Admissions & Ambulatory Care</div>
+        <div class="hospital-subtitle">Official Authoritative Patient Registration Record</div>
+      </td>
+      <td class="dossier-badge">
+        <div class="badge-status">{{ reg.status }}</div>
+        <div class="badge-reg-id">{{ reg.registration_id }}</div>
+        <div style="font-size: 8pt; color: #4b5563; margin-top: 2px;">PID: {{ patient.patient_id }}</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- SECTION 1: PATIENT IDENTIFICATION & DEMOGRAPHICS -->
+  <div class="section-title">1. Patient Identification & Demographics</div>
+  <table class="data-grid">
+    <tr>
+      <td class="label">Full Legal Name</td>
+      <td class="value" style="font-weight: bold;">{{ patient.full_name }}</td>
+      <td class="label">Patient Master ID</td>
+      <td class="value">{{ patient.patient_id }}</td>
+    </tr>
+    <tr>
+      <td class="label">Date of Birth</td>
+      <td class="value">{{ patient.date_of_birth }}</td>
+      <td class="label">Age at Intake</td>
+      <td class="value">{{ reg.age_at_registration }} years</td>
+    </tr>
+    <tr>
+      <td class="label">Legal Gender</td>
+      <td class="value">{{ patient.gender }}</td>
+      <td class="label">Blood Group</td>
+      <td class="value" style="font-weight: bold;">{{ patient.blood_group }}</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 2: CONTACT & RESIDENCE SNAPSHOT -->
+  <div class="section-title">2. Contact & Residential Details</div>
+  <table class="data-grid">
+    <tr>
+      <td class="label">Primary Phone</td>
+      <td class="value">{{ reg.contact_mobile }}</td>
+      <td class="label">Email Address</td>
+      <td class="value">{{ reg.contact_email or 'Not Provided' }}</td>
+    </tr>
+    <tr>
+      <td class="full-row-label">Residential Address</td>
+      <td colspan="3" class="full-row-value">{{ reg.residential_address or patient.street_address or 'Not Provided' }}</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 3: EMERGENCY CONTACT -->
+  <div class="section-title">3. Emergency Contact Designation</div>
+  <table class="data-grid">
+    <tr>
+      <td class="label">Contact Person</td>
+      <td class="value">{{ reg.emergency_contact_name or 'None Designated' }}</td>
+      <td class="label">Relationship</td>
+      <td class="value">{{ reg.emergency_contact_relationship or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <td class="label">Emergency Phone</td>
+      <td class="value">{{ reg.emergency_contact_phone or 'N/A' }}</td>
+      <td class="label">Verification State</td>
+      <td class="value">Documented at Admissions</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 4: MEDICAL & CLINICAL SAFETY SUMMARY -->
+  <div class="section-title">4. Medical Information & Clinical Disclosures</div>
+  <table class="data-grid">
+    <tr>
+      <td class="label">Existing Conditions</td>
+      <td class="value">{{ reg.existing_conditions }}</td>
+      <td class="label">Past Surgeries</td>
+      <td class="value">{{ reg.previous_surgeries }}</td>
+    </tr>
+    <tr>
+      <td class="label">Current Medications</td>
+      <td class="value">{{ reg.current_medications }}</td>
+      <td class="label">Allergy Status</td>
+      <td class="value {% if 'Active' in reg.allergy_status %}clinical-alert{% endif %}">{{ reg.allergy_status }}</td>
+    </tr>
+    {% if reg.allergies_detail %}
+    <tr>
+      <td class="full-row-label">Allergies Detail</td>
+      <td colspan="3" class="full-row-value clinical-alert">{{ reg.allergies_detail }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td class="full-row-label">Medical History</td>
+      <td colspan="3" class="full-row-value">{{ reg.medical_history }}</td>
+    </tr>
+    {% if reg.disability_accommodations %}
+    <tr>
+      <td class="full-row-label">Disability Accommodations</td>
+      <td colspan="3" class="full-row-value">{{ reg.disability_accommodations }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <!-- SECTION 5: INSURANCE & FINANCIAL RESPONSIBILITY -->
+  <div class="section-title">5. Insurance & Billing Coverage</div>
+  <table class="data-grid">
+    <tr>
+      <td class="label">Coverage Status</td>
+      <td class="value">{{ 'Active Insurance Policy' if reg.has_insurance else 'Self-Pay Patient' }}</td>
+      <td class="label">Provider Name</td>
+      <td class="value">{{ reg.insurance_provider or 'N/A' }}</td>
+    </tr>
+    {% if reg.has_insurance %}
+    <tr>
+      <td class="label">Policy Number</td>
+      <td class="value">{{ reg.insurance_policy_number or 'N/A' }}</td>
+      <td class="label">Policy Holder</td>
+      <td class="value">{{ reg.insurance_policy_holder or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <td class="label">Expiration Date</td>
+      <td class="value">{{ reg.insurance_expiry_date or 'N/A' }}</td>
+      <td class="label">Coverage Verification</td>
+      <td class="value">Verified</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <!-- SECTION 6: VISIT & CLINICAL ROUTING -->
+  <div class="section-title">6. Encounter Routing & Clinical Assignment</div>
+  <table class="data-grid">
+    <tr>
+      <td class="label">Assigned Department</td>
+      <td class="value" style="font-weight: bold;">{{ reg.department or 'General Medicine' }}</td>
+      <td class="label">Attending Clinician</td>
+      <td class="value">{{ reg.preferred_doctor or 'Staff On Duty' }}</td>
+    </tr>
+    <tr>
+      <td class="label">Preferred Date</td>
+      <td class="value">{{ reg.preferred_appointment_date or 'Walk-in / Immediate' }}</td>
+      <td class="label">Intake Protocol</td>
+      <td class="value">AEGIS Standard Electronic Triage</td>
+    </tr>
+    <tr>
+      <td class="full-row-label">Reason for Visit</td>
+      <td colspan="3" class="full-row-value">{{ reg.reason_for_visit or 'General Medical Evaluation' }}</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 7: ATTESTATION & HOSPITAL STAMP BOX -->
+  <div class="stamp-container">
+    <div class="stamp-box">
+      <div style="font-size: 8pt; font-weight: bold; color: #1e3a8a;">OFFICIAL HOSPITAL STAMP</div>
+      <div class="stamp-text">Place Institutional Embossed Seal Here</div>
+    </div>
+    <div class="signature-box">
+      <div class="sig-text">Authorized Admissions Officer / Clinical Registrar Signature</div>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE & LEGAL DISCLAIMER -->
+  <div class="disclaimer">
+    <strong>CONFIDENTIAL MEDICAL RECORD:</strong> This document contains legally privileged and confidential personal health information (PHI) protected under relevant data privacy laws. Unauthorized disclosure, copying, or distribution is strictly prohibited. Generated electronically via AEGIS (AI-Powered Smart Patient Registration System). Generated timestamp: {{ generated_at }} UTC.
+  </div>
+
+</body>
+</html>
+

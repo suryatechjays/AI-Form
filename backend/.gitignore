@@ -1,0 +1,36 @@
+# Environment & Secrets
+.env
+*.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# SQLite & Storage Data (PHI, Databases, Document Uploads, Generated PDF Dossiers)
+data/*
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.sqlite
+data/*.sqlite3
+data/uploads/**
+data/generated_pdfs/**
+data/pdfs/**
+!data/.gitkeep
+!data/uploads/.gitkeep
+!data/generated_pdfs/.gitkeep
+!data/pdfs/.gitkeep
+
+# Logs and temporary files
+*.log
+*.bak
+*.tmp
