@@ -9,8 +9,6 @@ import { authAPI, transformMeResponse } from '../services/api';
 const SYSTEM_ROLES_HINT = [
   { role: 'Super User', username: 'admin', badge: 'Full Admin', desc: 'Hospital management & audit logs' },
   { role: 'Receptionist', username: 'receptionist', badge: 'Intake Desk', desc: 'Patient intake & admissions roster' },
-  { role: 'Assistant Admin', username: 'assistant', badge: 'Delegated', desc: 'Scoped patient & encounter management' },
-  { role: 'Patient', username: 'patient', badge: 'Self Portal', desc: 'Self registration & records inspection' },
 ];
 
 export default function LoginPage({ onLoginSuccess }) {
